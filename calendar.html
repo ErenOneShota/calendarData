@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="http://cdn.static.runoob.com/libs/angular.js/1.4.6/angular.min.js"></script>
+</head>
+<body>
+
+<div ng-app="calendar" ng-controller="calendarCtrl">
+<input ng-model="currentYear"><button ng-click="confirm()">确定</button>
+    <div>{{currentYear}}年</div>
+    <div ng-repeat="month in year.months track by $index">
+        <table>
+            <thead>
+            <tr>
+                <th colspan="7">
+                    {{month.monthValue}}
+                </th>
+            </tr>
+            <tr><th>日</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th></tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="week in month.weeks">
+                <td ng-repeat="date in week">
+                    {{date.dateValue}}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    var app = angular.module('calendar', []);
+    app.controller('calendarCtrl', function($scope) {
+        $scope.currentYear = new Date().getFullYear();
+        $scope.year = createYearFullData($scope.currentYear);
+        $scope.confirm = function () {
+            $scope.year = createYearFullData($scope.currentYear);
+        };
+        function is_leap(year) {
+            return (year%100==0?(year%400==0?1:0):(year%4==0?1:0));
+        }
+        function createYearFullData(year) {
+            var fullData = {};
+            var m_days = new Array(31,28+is_leap(year),31,30,31,31,30,31,30,31,30,31);
+            fullData.yearValue = year+'年';
+            fullData.months = [];
+            for(var i = 0;i<12;i++){
+                fullData.months.push(createMonthData(year,i,m_days[i]));
+            }
+            return fullData;
+        }
+        function createMonthData(year,month,monthLength) {
+            var monthObj = {};
+            monthObj.weeks = [];
+            monthObj.monthValue = month+1+'月';
+            var n1str = new Date(year,month,1);
+            var firstDay = n1str.getDay();
+            var dateList = [];
+            for(var i = 0;i<monthLength;i++){
+                var obj = {};
+                obj.dateValue = i + 1;
+                obj.dateType = 0;
+                obj.timeMsec = new Date(year,month,i+1).getTime();
+                obj.timeStr = year + '-' + (month+1) + '-' + (i + 1);
+                dateList.push(obj);
+            }
+            for(var j = 0;j < firstDay;j++){
+                dateList.unshift({});
+            }
+            var week = [];
+            for(var k = 0;k < dateList.length;k++){
+                week.push(dateList[k]);
+                if(week.length == 7||k == dateList.length-1){
+                    monthObj.weeks.push(week);
+                    week = [];
+                }
+            }
+            return monthObj;
+        }
+    });
+</script>
+</body>
+</html>
